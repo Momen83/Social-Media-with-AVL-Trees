@@ -1,0 +1,588 @@
+#include "iostream"
+#include <fstream>
+#include <string>
+#include "stdio.h"
+using namespace std;
+class User
+{
+public:
+    string UserName;
+    string Name;
+    string email;
+
+
+    User()
+    {
+        UserName="";
+        Name="";
+        email="";
+    }
+    User(string username, string name , string Email)
+    {
+        //create
+        UserName=username;
+        Name=name;
+        email=Email;
+    }
+    //setters
+    void set_UserName (string username)
+    {
+        UserName=username;
+    }
+    void set_Name (string name)
+    {
+        Name=name;
+    }
+    void set_email (string Email)
+    {
+        email=Email;
+    }
+    //getters
+    string get_UserName()
+    {
+        return UserName;
+    }
+    string get_Name()
+    {
+        return UserName;
+    }
+    string get_Email()
+    {
+        return email;
+    }
+    friend ostream& operator<<(ostream& os, const User& dt)
+    {
+        os<<"User Name: "<<
+          dt.UserName<<endl<<"Name: "
+          << dt.Name<<endl
+          <<"Email: "<<dt.email<<endl;
+        return os;
+    }
+
+    class Treap
+    {
+    private:
+        string key;
+        User *s;
+        int priority;
+        Treap *left, *right;
+    public:
+        Treap *rightRotate(Treap *y)
+        {
+            Treap *x = y->left,  *T2 = x->right;
+
+            // Perform rotation
+            x->right = y;
+            y->left = T2;
+            // Return new root
+            return x;
+        }
+
+        Treap *leftRotate(Treap *x)
+        {
+            Treap *y = x->right, *T2 = y->left;
+
+            // Perform rotation
+            y->left = x;
+            x->right = T2;
+
+            // Return new root
+            return y;
+        }
+        Treap* newNode(string key,User* sol)
+        {
+            Treap* temp = new Treap();
+            temp->key = key;
+            temp->s=sol;
+            temp->priority = rand()%100;
+            temp->left = temp->right = NULL;
+            return temp;
+        }
+        Treap* search(Treap* root, string key)
+        {
+            // Base Cases: root is null or key is present at root
+            if (root == NULL || root->key == key)
+                return root;
+
+            // Key is greater than root's key
+            if (root->key < key)
+                return search(root->right, key);
+
+            // Key is smaller than root's key
+            return search(root->left, key);
+        }
+        Treap* insert(Treap* root, string key, User* sol)
+        {
+            // If root is NULL, create a new node and return it
+            if (!root)
+                return newNode(key,sol);
+
+            // If key is smaller than root
+            if (key<=root->key)
+            {
+                // Insert in left subtree
+                root->left = insert(root->left, key,sol);
+
+                // Fix Heap property if it is violated
+                if (root->left->priority > root->priority)
+                    root = rightRotate(root);
+            }
+            else  // If key is greater
+            {
+                // Insert in right subtree
+                root->right = insert(root->right, key,sol);
+
+                // Fix Heap property if it is violated
+                if (root->right->priority > root->priority)
+                    root = leftRotate(root);
+            }
+            return root;
+        }
+
+        Treap* deleteNode(Treap* root, string key)
+        {
+            if (root == NULL)
+                return root;
+
+            if (key < root->key)
+                root->left = deleteNode(root->left, key);
+            else if (key > root->key)
+                root->right = deleteNode(root->right, key);
+
+                // IF KEY IS AT ROOT
+
+                // If left is NULL
+            else if (root->left == NULL)
+            {
+                Treap *temp = root->right;
+                delete(root);
+                root = temp;  // Make right child as root
+            }
+
+                // If Right is NULL
+            else if (root->right == NULL)
+            {
+                Treap *temp = root->left;
+                delete(root);
+                root = temp;  // Make left child as root
+            }
+
+                // If ksy is at root and both left and right are not NULL
+            else if (root->left->priority < root->right->priority)
+            {
+                root = leftRotate(root);
+                root->left = deleteNode(root->left, key);
+            }
+            else
+            {
+                root = rightRotate(root);
+                root->right = deleteNode(root->right, key);
+            }
+
+            return root;
+        }
+        void inorder(Treap* root)
+        {
+
+            if (root)
+            {
+                inorder(root->left);
+
+                cout << "Friend "<< root->key<<endl ;
+                inorder(root->right);
+            }
+        }
+        int count(Treap *tree)
+        {
+            int c =  1;             //Node itself should be counted
+            if (tree ==NULL)
+                return 0;
+            else
+            {
+                c += count(tree->left);
+                c += count(tree->right);
+                return c;
+            }
+        }
+        string* Relations(Treap *tree)
+        {
+
+            int x=count(tree);
+            string * Friends =new string [x];
+            int cnt=x;
+            while (cnt<x)
+            {
+                if(tree==NULL){
+                    Friends[cnt]=tree->key;
+                }
+                Relations(tree->left);
+                Relations(tree->right);
+            }
+            return Friends;
+        }
+    };
+    Treap *Frinds= NULL;
+};
+
+
+
+class Node_List
+{
+private:
+    User Data;
+    Node_List *Next_Node;
+
+public:
+    Node_List *head,*tail;
+    int length =0;
+    Node_List()
+    {
+        head=tail= NULL;
+    }
+    Node_List(User info, Node_List* link= NULL)
+    {
+        head= this->Next_Node= tail=link;
+        this->Data=info;
+    }
+    User* getinfo(){return &Data;}
+    Node_List*getNext(){return Next_Node; }
+    void insertFirst(User item)
+    {
+        Node_List *newnodee=new Node_List(item);
+        if(length==0)
+        {
+            head=tail=newnodee;
+            newnodee->Next_Node= NULL;
+        }
+        else
+        {
+            newnodee->Next_Node=head;
+            head=newnodee;
+        }
+        length++;
+    }
+    void insertEnd(User item)
+    {
+        Node_List*newnodee=new Node_List(item);
+        if(length==0)
+        {
+            head=tail=newnodee;
+            newnodee->Next_Node=NULL;
+        }
+        else
+        {
+            tail->Next_Node=newnodee;
+            newnodee->Next_Node=NULL;
+            tail=newnodee;
+        }
+        length++;
+    }
+    bool isEmpty()
+    {
+        return length==0;
+    }
+    void removeFirst()
+    {
+        if(length==0){
+            cout<<"Empty list Can't Remove\n";
+        }
+        else if(length==1)
+        {
+            delete head;
+            head= tail=NULL;
+            length--;
+        }
+        else
+        {
+            Node_List*Curr=head;
+            head=head->Next_Node;
+            delete Curr;
+            length--;
+
+        }
+    }
+    void removeEnd()
+    {
+        if(length==0){
+            cout<<"Empty list Can't Remove\n";
+        }
+        else if(length==1)
+        {
+            delete head;
+            head= tail=NULL;
+            length--;
+        }
+        else
+        {
+            Node_List*Curr=head;
+            Node_List*Pre=Curr;
+            while(Curr!=tail)
+            {
+                Pre=Curr;
+                Curr=Curr->Next_Node;
+            }
+            delete Curr;
+            Pre->Next_Node=NULL;
+            tail=Pre;
+            length--;
+        }
+    }
+    void remove(User element )
+    {
+        if(isEmpty())
+        {
+            cout<<"Empty list Can't Remove\n";
+        }
+        Node_List*Curr=head;
+        Node_List*Pre=Curr;
+        if(head->Data.get_UserName()==element.get_UserName())
+        {
+            Curr=head;
+            head=head->Next_Node;
+            delete Curr;
+            length--;
+            if(length==0)
+            {
+                tail=NULL;
+
+            }
+        }
+        else
+        {
+            Curr= head->Next_Node= Pre=head;
+            while (Curr!=NULL&&Curr->Data.get_UserName()!=element.get_UserName())
+            {
+                Pre=Curr;
+                Curr=Curr->Next_Node;
+
+            }
+            if(Curr==NULL)
+            {
+                cout<<"Not Found"<<endl;
+            }
+            else
+            {
+                Pre->Next_Node=Curr->Next_Node;
+                if(tail==Curr){tail=Pre;}
+                delete Curr;
+                length--;
+            }
+        }
+
+    }
+
+    User * search(string temp)
+    {
+        Node_List *Curr=head;
+        while (Curr!= NULL)
+        {
+            if(temp==Curr->Data.UserName) {
+                return Curr->getinfo();
+
+            }
+            Curr = Curr->Next_Node;
+
+        }
+        return nullptr;
+    }
+
+    void print ()
+    {
+        Node_List*Curr=head;
+        while (Curr!= NULL)
+        {
+            cout<<Curr->getinfo()<<endl;
+            cout<<Curr->Data<<endl;
+            Curr=Curr->Next_Node;
+        }
+
+    }
+};
+int main()
+{
+    ifstream file("E:\\DS_project\\all-users.in");
+    string str;
+    string file_contents;
+    Node_List *data1;
+    data1=new Node_List();
+    User usser;
+    while (std::getline(file, str))
+    {
+
+        string temp="";
+        string user_data[2];
+        int cnt=0;
+
+        for (int i = 0; i < str.length(); ++i) {
+            if(str[i]==','){user_data[cnt]=temp; i++; cnt++; temp="";}
+            else{
+                temp=temp+str[i];
+            }
+        }
+        usser.UserName=user_data[0];
+        usser.Name=user_data[1];
+        usser.email=temp;
+        data1->insertEnd(usser);
+    }
+    ifstream fileRealtions("E:\\DS_project\\all-users-relations.in");
+    string str2;
+
+    while (std::getline(fileRealtions, str2))
+    {
+        string username1,username2,temp="";
+        for(int i=0;i<str2.size();i++)
+        {
+            if(str2[i]==','){
+                username1=temp;
+                temp="";
+                i+=2;
+            }
+            temp+=str2[i];
+        }
+        username2=temp;
+        User *ss,*ss2;
+        ss=data1->search(username1);
+        ss2=data1->search(username2);
+        if( ss->Frinds->search(ss->Frinds,username2)==NULL )
+
+        {
+            ss->Frinds=ss->Frinds->insert(ss->Frinds,username2,ss2);
+            //ss2->Frinds=ss2->Frinds->insert(ss2->Frinds,username1,ss);
+        }
+        else
+        {
+            cout<<"Already you are friends \n";
+        }
+
+        if( ss2->Frinds->search(ss2->Frinds,username1)==NULL )
+        {
+            ss2->Frinds=ss2->Frinds->insert(ss2->Frinds,username1,ss);
+        }
+        else
+        {
+            cout<<"Already you are friends \n";
+        }
+
+    }
+    while(true)
+    {
+        int option;
+        cout<<"1-Login\n";
+        cout<<"2-Exit\n";
+        cin>>option;
+        if(option==2){break;}
+        else
+        {
+            string UserName;
+            cout<<"Enter User Name:\n";
+            cin>>UserName;
+            User *userObj=data1->search(UserName);
+            if(userObj== nullptr)
+            {
+                cout<<"User name is not found\n";
+                continue;
+            }
+            else {
+                cout << "Login Successfully\n";
+                while (true) {
+                    int option2;
+                    cout << "1-List all Friends\n";
+                    cout << "2-Search by username\n";
+                    cout<<"3- Add friend\n";
+                    cout<<"4- Remove friend\n";
+                    cout<<"5- people you may know\n";
+                    cout<<"6- Log out\n";
+                    cin >> option2;
+                    if (option2 == 1) {
+                        userObj->Frinds->inorder(userObj->Frinds);
+                        //userObj->Frinds->getNumOfNode();
+                    }
+                    if (option2 == 2) {
+                        string userName2;
+                        cout << "Enter User Name u want to search\n";
+                        cin >> userName2;
+                        User *userObj2 = data1->search(userName2);
+                        if (userObj2 == nullptr) {
+                            cout << "User Name not found\n";
+                            continue;
+                        } else {
+                            cout << *userObj2;
+                        }
+                    }
+                    if(option2==3)
+                    {
+                        string userName3;
+                        cout << "Enter User Name u want to add\n";
+                        cin >> userName3;
+                        User *userObj3 = data1->search(userName3);
+                        if (userObj3 == nullptr) {
+                            cout << "User Name not found\n";
+                            continue;}
+                        else
+                        {
+                            if(userObj->Frinds->search(userObj->Frinds,userName3)!=NULL)
+                            {
+                                cout<<"You Are Already Friends\n";
+                                continue;
+                            }
+                            else
+                            {
+                                userObj3->Frinds=userObj3->Frinds->insert(userObj3->Frinds,UserName,userObj);
+                                userObj->Frinds=userObj->Frinds->insert(userObj->Frinds,userName3,userObj3);
+                                ofstream foutput;
+                                ifstream finput;
+                                finput.open ("E:\\DS_project\\all-users-relations.in");
+                                foutput.open ("E:\\DS_project\\all-users-relations.in",ios::app);
+
+                                if(finput.is_open())
+                                    foutput<<"\n"<<UserName<<", "<<userName3<<"\n";
+                                cout<<"Congratulation u are Friends now\n";
+                                finput.close();
+                                foutput.close();
+                            }
+
+
+                        }
+                    }
+                    if(option2==4)
+                    {
+                        string userName4,sw="";
+                        cout << "Enter User Name u want to delete\n";
+                        cin>>userName4;
+                        User * userObject4=data1->search(userName4);
+
+                        if(userObj->Frinds->deleteNode( userObj->Frinds,userName4)==NULL)
+                        {
+                            cout<<"They are not Friends\n";
+                        }
+                        else
+                        {
+
+                            userObj->Frinds=userObj->Frinds->deleteNode( userObj->Frinds,userName4);
+                            userObject4->Frinds=userObject4->Frinds->deleteNode(userObject4->Frinds,UserName);
+                            cout<<"The Not become friends\n";
+                        }
+
+                    }
+                    if(option2==5)
+                    {
+                        Node_List *listt=data1->head;
+                        while (listt!=NULL)
+                        {
+
+                            if(userObj->Frinds->search(userObj->Frinds,listt->getinfo()->get_UserName())==NULL)
+                            {
+                                if(listt->getinfo()->get_UserName()!=UserName)
+                                cout<<listt->getinfo()->get_UserName()<<endl;
+                            }
+                            listt=listt->getNext();
+                        }
+                    }
+                    if(option2==6){break;}
+                }
+            }
+        }
+    }
+
+
+}
